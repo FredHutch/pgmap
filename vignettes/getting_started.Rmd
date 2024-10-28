@@ -62,15 +62,15 @@ bam_dir <- file.path(example_data_folder(), "bam")
 ## Demux potentially here
 
 ```{r}
-## TODO: 
+## TODO:
 ```
 
 ## Quality control
 
 ```{r}
-fastqc(fq.dir = fastq_dir, # FASTQ files directory
-       qc.dir = , # Results directory
-       threads = 4                    # Number of threads
+fastqc(fq.dir = fastq_dir,
+       qc.dir = "quality control reports",
+       threads = 4
        )
 ```
 

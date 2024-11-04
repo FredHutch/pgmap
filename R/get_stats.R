@@ -1,12 +1,12 @@
 #' Obtain the stats for a group of samples
 #' @description This function takes a forward and reverse bam files for a group of samples and returns alignment stats.
 #' @param bam_dir a file path to a directory where the bam files associated with the sample names will be stored.
-#' @param sample_name a character vector that indicates the name of the samples as they are listed in the file names.
+#' @param sample_names a character vector that indicates the name of the samples as they are listed in the file names.
 #' @param output_dir a file path to where you'd like the stats to be saved to. By default its "stats" folder. This folder will be
 #' created if it doesn't exist.
 #' @param time TRUE/FALSE you want the duration this takes to run printed out
-#' @importFrom furrr future_pmap future_map
-#' @importFrom purrr reduce
+#' @importFrom furrr future_map
+#' @importFrom Rsamtools quickBamFlagSummary
 #' @import dplyr
 #' @importFrom tibble rownames_to_column
 #' @export
@@ -51,6 +51,7 @@ get_stats <- function(bam_dir, sample_names, output_dir = "stats", time = FALSE)
   })
 
   if (time) message(paste0("Done(", signif(as.numeric(difftime(Sys.time(), timing, units = "mins")), 2), "m elapsed).\n"))
+
   # Return as a list of two data frames
   message("Stats saved to", output_dir)
 }

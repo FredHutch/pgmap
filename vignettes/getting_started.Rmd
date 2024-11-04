@@ -16,6 +16,14 @@ knitr::opts_chunk$set(
 
 # pgmap tutorial
 
+```{r}
+#library(pgmap)
+```
+
+```{r}
+devtools::load_all()
+```
+
 
 ## Build Indices
 
@@ -56,7 +64,7 @@ sample_names <- c("sample1", "sample2", "sample3")
 fastq_dir <- file.path(example_data_folder(), "fastqs", "fastq_demuxed")
 
 # This will be the directory that contains all the file path
-bam_dir <- file.path(example_data_folder(), "bam")
+bam_dir <- file.path(example_data_folder(), "aligned_bam")
 ```
 
 ## Demux potentially here
@@ -67,10 +75,8 @@ bam_dir <- file.path(example_data_folder(), "bam")
 
 ## Quality control
 
-
-
 ```{r}
-fastqc(fq.dir = fastq_dir,
+fastqcr::fastqc(fq.dir = fastq_dir,
        qc.dir = "quality control reports",
        threads = 4
        )

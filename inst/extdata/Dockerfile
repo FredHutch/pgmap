@@ -2,8 +2,6 @@
 FROM rocker/tidyverse:4.3.2
 LABEL maintainer="cansav09@gmail.com"
 
-WORKDIR /rocker-build/
-
 # Install apt-getable packages to start
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils dialog
 RUN apt-get install -y --no-install-recommends \
@@ -13,28 +11,17 @@ RUN apt-get install -y --no-install-recommends \
     libglpk40 \
     curl \
     gpg \
-    bzip2
+    bzip2 
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    python3-pip \
-    python3-dev 
+################### Install FASTQC ###################
+# set location
+ENV FASTQC_LOC http://www.bioinformatics.babraham.ac.uk/projects/fastqc
 
-## Put more python packages we need here 
-################### Install Seqtk ###################
-ENV ZIP=seqtk-1.4.tar.gz
-ENV URL=https://github.com/lh3/seqtk/archive/refs/tags/v1.4.tar.gz
-ENV FOLDER=seqtk-1.4
-ENV DST=/home/seqtk
-
-RUN mkdir -p $DST && \
-    wget $URL -O $DST/$ZIP && \
-    tar -xzvf $DST/$ZIP -C $DST && \
-    rm $DST/$ZIP
-
-WORKDIR $DST/$FOLDER
-
-RUN make
+# Download and install FastQC; replace low java memory requirement in fastq perl code
+WORKDIR /usr/local
+ADD ${FASTQC_LOC}/fastqc_v0.11.5.zip /tmp/
+RUN unzip /tmp/fastqc_v0.11.5.zip && sed -i 's/Xmx250m/Xmx2048m/' FastQC/fastqc && chmod 755 FastQC/fastqc
+ENV PATH /usr/local/FastQC/:$PATH
 
 ################## Install Bowtie2 ##################
 
@@ -75,5 +62,5 @@ RUN installGithub.r \
 ################# COPY over config files 
 COPY config config/
 
-WORKDIR /data
+WORKDIR /home
 

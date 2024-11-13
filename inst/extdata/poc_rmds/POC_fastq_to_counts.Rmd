@@ -1,0 +1,45 @@
+---
+title: "POC_bam_to_counts"
+author: "Candace Savonen"
+date: "2024-10-24"
+output: html_document
+---
+
+
+```{r}
+
+library(magrittr)
+library(ShortRead)
+fastq1 <- Biostrings::readDNAStringSet("../data/fastqs/fastq_demuxed/pgMAP_tutorial_gRNA1_trimmed_sample1.fastq.gz", format="fastq")
+fastq2 <- Biostrings::readDNAStringSet("../data/fastqs/fastq_demuxed/pgMAP_tutorial_gRNA2_trimmed_sample1.fastq.gz", format="fastq")
+
+#guides1 <- Biostrings::readDNAStringSet("../config/ref/pgPEN_R1.fa")
+#guides2 <- Biostrings::readDNAStringSet("../config/ref/pgPEN_R2.fa")
+
+
+index_1 <- readLines("../config/ref/pgPEN_R1.fa")
+index_1 <- data.frame(names = index_1[grepl("^>", index_1 )], 
+                      sequences = index_1[!grepl("^>", index_1 )])
+
+index_2 <- readLines("../config/ref/pgPEN_R2.fa")
+index_2 <- data.frame(names = index_2[grepl("^>", index_2 )], 
+                      sequences = index_2[!grepl("^>", index_2 )])
+
+
+index <-  index_1 %>% dplyr::inner_join(index_2, by = "names", 
+                                        suffix = c("_r1", "_r2"))
+
+furrr::future_pmap(index, function(names, sequences){
+  
+    fastq1@ranges@NAMES
+  
+    count1 <- vcountPattern(index$sequences_r1[1], fastq1)
+    count2 <- vcountPattern(index$sequences_r2[1], fastq2)
+    
+    matching <- match(fastq1@ranges@NAMES[which(count1 > 0)], fastq2@ranges@NAMES[which(count2 > 0)])
+    
+    sum(!is.na(matching))
+
+})
+```
+

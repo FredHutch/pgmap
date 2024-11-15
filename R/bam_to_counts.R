@@ -88,17 +88,17 @@ sample_count <- function(bam_1, bam_2, sample_name, time = FALSE) {
   # define parameters for reading in BAM files, then read them in:
   # qname = the name of the mapped read (query template name)
   # rname = the name of the reference sequence that the read aligned to (reference sequence name)
-  param <- ScanBamParam(
+  param <- Rsamtools::ScanBamParam(
     ## restrict to mapped reads
-    flag = scanBamFlag(isUnmappedQuery = FALSE),
+    flag = Rsamtools::scanBamFlag(isUnmappedQuery = FALSE),
     ## only read in the necessary fields
     what = c("qname", "rname")
   )
 
   # Read in the BAM files
-  bam_1 <- scanBam(bam_1, param = param) %>%
+  bam_1 <- Rsamtools::scanBam(bam_1, param = param) %>%
     as.data.frame()
-  bam_2 <- scanBam(bam_2, param = param) %>%
+  bam_2 <- Rsamtools::scanBam(bam_2, param = param) %>%
     as.data.frame()
 
   # Join forward and reverse bams together.

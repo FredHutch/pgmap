@@ -7,39 +7,105 @@ output: html_document
 
 
 ```{r}
-
 library(magrittr)
 library(ShortRead)
-fastq1 <- Biostrings::readDNAStringSet("../data/fastqs/fastq_demuxed/pgMAP_tutorial_gRNA1_trimmed_sample1.fastq.gz", format="fastq")
-fastq2 <- Biostrings::readDNAStringSet("../data/fastqs/fastq_demuxed/pgMAP_tutorial_gRNA2_trimmed_sample1.fastq.gz", format="fastq")
 
-#guides1 <- Biostrings::readDNAStringSet("../config/ref/pgPEN_R1.fa")
-#guides2 <- Biostrings::readDNAStringSet("../config/ref/pgPEN_R2.fa")
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+```
+
+## Set up index
+
+```{r}
+setup_index <- function(g1 = "../config/ref/pgPEN_R1.fa",
+                        g2 = "../config/ref/pgPEN_R2.fa") {
+  index_1 <- readLines(g1)
+  index_1 <- data.frame(
+    construct = index_1[grepl("^>", index_1)],
+    seq = index_1[!grepl("^>", index_1)]
+  )
+
+  index_2 <- readLines(g2)
+  index_2 <- data.frame(
+    construct = index_2[grepl("^>", index_2)],
+    seq = index_2[!grepl("^>", index_2)]
+  )
+
+  index <- index_1 %>%
+    dplyr::inner_join(index_2,
+      by = "construct",
+      suffix = c("_r1", "_r2")
+    ) %>%
+    dplyr::mutate(construct = gsub("^>", "", construct)) %>%
+    dplyr::mutate(both = paste(seq_r1, seq_r2, sep = "_"))
+
+  copy_to(con, index)
+}
+```
+
+## Read in fastq files and make sql
+
+```{r}
+setup_sample <- function(r1 = "../data/fastqs/fastq_demuxed/pgMAP_tutorial_gRNA1_trimmed_sample1.fastq.gz",
+                         r2 = "../data/fastqs/fastq_demuxed/pgMAP_tutorial_gRNA2_trimmed_sample1.fastq.gz",
+                         index = index) {
+  fastq1 <- Biostrings::readDNAStringSet(r1, format = "fastq") %>%
+    as.data.frame() %>%
+    tibble::rownames_to_column("name") %>%
+    dplyr::rename(seq = x)
+
+  dplyr::copy_to(con, fastq1)
+
+  fastq2 <- Biostrings::readDNAStringSet(r2, format = "fastq") %>%
+    as.data.frame() %>%
+    tibble::rownames_to_column("name") %>%
+    dplyr::rename(seq = x)
+
+  dplyr::copy_to(con, fastq2)
+
+  fastq_df <- dplyr::inner_join(fastq1, fastq2,
+    by = "name",
+    suffix = c("_r1", "_r2")
+  ) %>%
+    dplyr::mutate(both = paste(seq_r1, seq_r2, sep = "_"))
+
+  counts <- fastq_df %>%
+    dplyr::inner_join(index,
+      by = "both",
+      suffix = c("_reads", "_index")
+    ) %>%
+    dplyr::count(construct) %>%
+    dplyr::collect()
+
+  return(counts)
+}
+```
 
 
-index_1 <- readLines("../config/ref/pgPEN_R1.fa")
-index_1 <- data.frame(names = index_1[grepl("^>", index_1 )], 
-                      sequences = index_1[!grepl("^>", index_1 )])
+```{r}
+sample_1 <- setup_sample("../data/fastqs/fastq_demuxed/pgMAP_tutorial_gRNA1_trimmed_sample1.fastq.gz", 
+             "../data/fastqs/fastq_demuxed/pgMAP_tutorial_gRNA2_trimmed_sample1.fastq.gz")
 
-index_2 <- readLines("../config/ref/pgPEN_R2.fa")
-index_2 <- data.frame(names = index_2[grepl("^>", index_2 )], 
-                      sequences = index_2[!grepl("^>", index_2 )])
+```
 
 
-index <-  index_1 %>% dplyr::inner_join(index_2, by = "names", 
-                                        suffix = c("_r1", "_r2"))
 
-furrr::future_pmap(index, function(names, sequences){
-  
-    fastq1@ranges@NAMES
-  
-    count1 <- vcountPattern(index$sequences_r1[1], fastq1)
-    count2 <- vcountPattern(index$sequences_r2[1], fastq2)
-    
-    matching <- match(fastq1@ranges@NAMES[which(count1 > 0)], fastq2@ranges@NAMES[which(count2 > 0)])
-    
-    sum(!is.na(matching))
 
-})
+
+## Compare to original data
+
+```{r}
+og_counts <- readr::read_tsv("expected_pgMAP_tutorial_pgRNA_counts.txt")
+```
+
+## Combine data 
+
+```{r}
+both <- dplyr::inner_join(counts, og_counts,
+  by = c("construct" = "id")
+)
+```
+
+```{r}
+plot(both$n, both$counts_sample1, xlab = "new counts sample 1", ylab = "old counts sample 1")
 ```
 

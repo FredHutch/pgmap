@@ -1,5 +1,0 @@
-"0","```r
-# the quant files themselves
-sf_files <- list.files(quant_dir, recursive = TRUE, full.names = TRUE,
-                       pattern = \"quant.sf\")
-```"

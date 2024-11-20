@@ -1,0 +1,3 @@
+"0","# Name the output gastric-cancer_tximeta.RDS and use the directory created"
+"0","# above as the rest of the path"
+"0","txi_out_file <- file.path(txi_dir, ""tximeta.RDS"")"

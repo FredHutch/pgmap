@@ -1,0 +1,2 @@
+"0","coldata <- data.frame(files = sf_files,"
+"0","                      names = c(""sample1_r1"", ""sample1_r2""))"

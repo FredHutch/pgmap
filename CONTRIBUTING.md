@@ -11,20 +11,11 @@ This document describes how to contribute to this R package.
 
 ## Automatic checks
 
-- `R-CMD-checks` - these checks make sure that the R package files are built properly. It will also rebuild the vignette underneath 4 different operating systems:
-  - windows
-  - macOS
-  - ubuntu release
-  - ubuntu dev
-- `docker-build.yml` - handles the docker image associated with this pipeline. Any changes to the docker image will be tested by this GitHub Action by rebuilding it.
-- `style-code.yml` - this will style your code and commit any changes to the pull request
-
+TODO: Describe
 
 ## Testing
 
-Whenever appropriate, new functions should be added to:
-  - the `vignette/getting-started.Rmd` if they are a part of the essential workflow.
-  - a unit test using testthat. You can create a new test using `usethis::use_test("name")`. then open up that file in the `tests/testthat` folder and write a test there. See this chapter for how to write tests https://r-pkgs.org/testing-basics.html
+Whenever appropriate, new functions should be added to the unit tests
 
 
 ## Docker image

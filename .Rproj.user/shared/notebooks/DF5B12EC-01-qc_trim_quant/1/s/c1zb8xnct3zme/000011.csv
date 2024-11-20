@@ -1,0 +1,3 @@
+"0","# the quant files themselves"
+"0","sf_files <- list.files(quant_dir, recursive = TRUE, full.names = TRUE,"
+"0","                       pattern = ""quant.sf"")"

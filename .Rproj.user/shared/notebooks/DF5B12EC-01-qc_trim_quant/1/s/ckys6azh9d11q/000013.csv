@@ -1,0 +1,5 @@
+"0","quant_all <- quant %>% "
+"0","  dplyr::left_join(original_counts, by = c(""Name"" = ""id"")) "
+"0",""
+"0",""
+"0","plot(quant_all$minRead, quant_all$sample1)"

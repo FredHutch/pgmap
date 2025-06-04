@@ -44,81 +44,32 @@ bibliography: paper.bib
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+Genetic interactions occur when two or more genes interact to produce a phenotype that differs from the effect of both genes considered independently. Synthetic lethality is a type of genetic interaction between two genes where the loss of either gene is tolerated individually, but the loss of both genes results in a reduction of cell viability. One possible application of synthetic lethality is cancer therapies. The CRISPR-Cas system allows scalable investigation of synthetic lethality directly in lab-cultured human tumor cells. However, current tools for analyzing dual-targeting CRISPR screens, which is the preferred method to study synthetic lethality at scale, are poorly established compared to existing tools for single-targeting CRISPR screens. We present pgMAP (paired guide RNA MAPper): a command line tool built to read paired guide counts from dual-targeting CRISPR screening sequencing data. By quantifying the relative depletion and enrichment of paired guides between different samples, pgMAP enables the discovery of genetic interactions across many organisms, genetic backgrounds, tissues, and cancer types.
 
-# Statement of need
+# Statement of Need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+In recent years, several genome-scale, dual-targeting CRISPR-mediated knockout screening approaches have been developed to map genetic interactions in the human genome (Dede et al., 2020; Gonatopoulos-Pournatzis et al., 2020; Ito et al., 2021; Köferle et al., 2022; Parrish et al., 2021; Tang et al., 2022; Thompson et al., 2021). These methods enable functional profiling of duplicated gene families and expand the range of potentially targetable synthetic lethal interactions in cancer (Dandage and Landry, 2021; Ryan et al., 2023). However, computational methods for genetic interaction mapping from human CRISPR screen data are poorly established, which may impede interpretation of dual-targeting CRISPR screen data and thus prevent identification of actionable synthetic lethal targets.
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+pgMAP is a command line tool that processes raw sequencing data into tables of counts per genetic perturbation. pgMAP is purpose-built for genetic interaction analysis; rather than utilizing bioinformatics tools designed for general-purpose alignment of DNA sequences, pgMAP exploits the paired structure of dual-targeting CRISPR experiments to efficiently map and count paired guides. Compared to previous approaches, pgMAP produces equivalent results over three times faster while requiring constant memory and disk space relative to the number of reads in the raw sequencing data (TODO point to table below). As a general purpose tool for analyzing paired knockout CRISPR screen data, pgMAP can be configured with parameters including error tolerances and sequencing strategies to suit a wide berth of experimental designs.
 
-# Mathematics
+# Description of Algorithm
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+pgMAP’s counting algorithm takes advantage of the structure of paired CRISPR guide libraries. Paired guide libraries are composed of pairs of guide RNA sequences. While the number of unique guide RNA pairs can be in the tens of thousands, there are orders of magnitude fewer unique guide sequences. Therefore, it is possible to directly hash all the guide sequences and efficiently map to them while reading from sequencing data. To support error tolerance, pgMAP hashes every possible error perturbed sequence within an error tolerance of each reference guide sequence. With the suggested error tolerance of a single substitution, pgMAP uses less than 50mb of memory when applied to data generated using the pgPEN CRISPR library, which contains ~33,000 pgRNAs (citation needed for pgPEN).
 
-Double dollars make self-standing equations:
+Compared to an approach using a general purpose aligner like bowtie (citation needed), there is no need to demultiplex individual samples before aligning. Additionally, no intermediate alignment files are generated by pgMAP and no pipeline of bioinformatics tools is necessary to orchestrate individual steps. pgMAP is implemented with Python and depends only on the Levenshtein Python package for string distance calculations (citation for Levenshtein package).
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
+# Research Using pgMAP
 
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
+pgMAP is currently being utilized in ongoing research projects in the Berger lab, including follow-up work to previous paired gRNA CRISPR screens (Cite Cell rep paper).
 
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
+TODO say something about usage with gimap
 
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+M. Fujimoto was supported by the NIH award R25HG012337.
+
+S. O’Brien is a Washington Research Foundation postdoctoral fellow.
+
+This work was supported in part by NCI R01CA262556, the American Cancer Society, and a pilot award from the Fred Hutch Translational Data Science Integrated Research Center.
 
 # References

@@ -1,41 +1,45 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'pgMAP: Paired Guide RNA Read Mapping from Dual-Targeting CRISPR Screens'
 tags:
   - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - bioinformatics
+  - genomics
+  - CRISPR
 authors:
-  - name: Adrian M. Price-Whelan
-    orcid: 0000-0000-0000-0000
-    equal-contrib: true
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    affiliation: 2
-  - name: Author with no affiliation
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 3
-  - given-names: Ludwig
-    dropping-particle: van
-    surname: Beethoven
-    affiliation: 3
+  - name: Marissa H. Fujimoto
+    affiliation: "1"
+  - name: Candace L. Savonen
+    affiliation: "1"
+  - name: Siobhan O'Brien
+    affiliation: "1"
+  - name: Phoebe C.R. Parrish
+    affiliation: "1, 2, 3"
+  - name: Daniel J. Groso
+    affiliation: "1, 2"
+  - name: James D. Thomas
+    affiliation: "2, 4"
+  - name: Robert K. Bradley
+    affiliation: "2, 3, 4"
+  - name: Alice H. Berger
+    affiliation: "1, 2, 3"
+    corresponding: True
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University, United States
+ - name: Human Biology Division, Fred Hutchinson Cancer Center, Seattle, WA 98109, USA
    index: 1
-   ror: 00hx57361
- - name: Institution Name, Country
+   ror: 007ps6h72
+ - name: Computational Biology Program, Public Health Sciences Division, Fred Hutchinson Cancer Center, Seattle, WA 98109, USA
    index: 2
- - name: Independent Researcher, Country
+   ror: 007ps6h72
+ - name: Department of Genome Sciences, University of Washington, Seattle, WA 98195, USA
    index: 3
-date: 13 August 2017
+   ror: 00cvxb145
+ - name: Basic Sciences Division, Fred Hutchinson Cancer Center, Seattle, WA 98109, USA
+   index: 4
+   ror: 007ps6h72
+
+date: 3 June 2025
 bibliography: paper.bib
 
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary

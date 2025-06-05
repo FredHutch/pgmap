@@ -52,6 +52,8 @@ In recent years, several genome-scale, dual-targeting CRISPR-mediated knockout s
 
 pgMAP is a command line tool that processes raw sequencing data into tables of counts per genetic perturbation. pgMAP is purpose-built for genetic interaction analysis; rather than utilizing bioinformatics tools designed for general-purpose alignment of DNA sequences, pgMAP exploits the paired structure of dual-targeting CRISPR experiments to efficiently map and count paired guides. Compared to previous approaches, pgMAP produces equivalent results over three times faster while requiring constant memory and disk space relative to the number of reads in the raw sequencing data (\autoref{performance-table}). As a general purpose tool for analyzing paired knockout CRISPR screen data, pgMAP can be configured with parameters including error tolerances and sequencing strategies to suit a wide berth of experimental designs.
 
+The paired guide counts data from pgMAP can be further analyzed using the gimap R package to perform quality control and statistical analysis of genetic interaction [@Savonen2025-je]. Together pgMAP and gimap provide a complete software suite for the end-to-end data analysis of paired knockout CRISPR screens.
+
 | Tool             | Mean (Minutes) | Min (Minutes) | Max (Minutes) | Peak Memory Usage (GB) | Intermediate File(s) Size (GB)|
 |------------------|:--------------:|:-------------:|:-------------:|:----------------------:|:-----------------------------:|
 | bowtie pipeline* | 72.35          | 71.69         | 72.92         | 0.026                  | 28.64                         |
@@ -72,8 +74,6 @@ Compared to an approach using a general purpose aligner like bowtie (citation ne
 # Research Using pgMAP
 
 pgMAP is currently being utilized in ongoing research projects in the Berger lab, including follow-up work to previous paired gRNA CRISPR screens [@Parrish2021-pd].
-
-TODO say something about usage with gimap
 
 # Acknowledgements
 

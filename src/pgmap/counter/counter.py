@@ -3,6 +3,7 @@ from typing import Counter, Iterable
 import itertools
 
 from pgmap.model.paired_read import PairedRead
+from pgmap.model.quality_control_statistics import QualityControlStatistics
 from pgmap.alignment import pairwise_aligner, grna_cached_aligner
 
 
@@ -35,7 +36,6 @@ def get_counts(paired_reads: Iterable[PairedRead],
         paired_guide_counts (Counter[tuple[str, str, str]]): The counts of each (gRNA1, gRNA2, barcode) detected
         within the paired reads.
     """
-    # TODO should this keep track of metrics for how many paired reads get discarded and at which step? maybe with a verbose logging option?
     # TODO should we key with sample id instead of barcode sequence?
     # TODO should alignment algorithm be user configurable?
 
@@ -73,3 +73,69 @@ def get_counts(paired_reads: Iterable[PairedRead],
         paired_guide_counts[(gRNA1, gRNA2, barcode)] += 1
 
     return paired_guide_counts
+
+
+def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
+                            gRNA_mappings: dict[str, set[str]],
+                            barcodes: set[str],
+                            gRNA1_error_tolerance: int = 1,
+                            gRNA2_error_tolerance: int = 1,
+                            barcode_error_tolerance: int = 1) -> tuple[Counter[tuple[str, str, str]], QualityControlStatistics]:
+    # TODO docs
+    paired_guide_counts = Counter()
+
+    total_reads = 0
+    discard_count = 0
+    gRNA1_mismatch_count = 0
+    gRNA2_mismatch_count = 0
+    barcode_mismatch_count = 0
+    estimated_recombination_count = 0
+
+    gRNA1_cached_aligner = grna_cached_aligner.construct_grna_error_alignment_cache(
+        gRNA_mappings.keys(), gRNA1_error_tolerance)
+
+    gRNA2_cached_aligner = grna_cached_aligner.construct_grna_error_alignment_cache(
+        set(itertools.chain.from_iterable(gRNA_mappings.values())), gRNA2_error_tolerance)
+
+    for paired_read in paired_reads:
+        paired_read.gRNA1_candidate
+
+        gRNA1, gRNA2, barcode = None, None, None
+        recombination = False
+
+        if paired_read.gRNA1_candidate in gRNA1_cached_aligner:
+            gRNA1, _ = gRNA1_cached_aligner[paired_read.gRNA1_candidate]
+        else:
+            gRNA1_mismatch_count += 1
+
+        if paired_read.gRNA2_candidate in gRNA2_cached_aligner:
+            gRNA2, _ = gRNA2_cached_aligner[paired_read.gRNA2_candidate]
+        else:
+            gRNA2_mismatch_count += 1
+
+        if gRNA1 and gRNA2 and gRNA2 not in gRNA_mappings[gRNA1]:
+            recombination = True
+            estimated_recombination_count += 1
+
+        barcode_score, barcode = max((pairwise_aligner.edit_distance_score(
+            paired_read.barcode_candidate, reference), reference) for reference in barcodes)
+
+        if (len(barcode) - barcode_score) > barcode_error_tolerance:
+            barcode_mismatch_count += 1
+            barcode = None
+
+        if gRNA1 and gRNA2 and barcode and not recombination:
+            paired_guide_counts[(gRNA1, gRNA2, barcode)] += 1
+        else:
+            discard_count += 1
+
+        total_reads += 1
+
+    qc_stats = QualityControlStatistics(total_reads=total_reads,
+                                        discard_rate=discard_count / total_reads,
+                                        gRNA1_mismatch_rate=gRNA1_mismatch_count / total_reads,
+                                        gRNA2_mismatch_rate=gRNA2_mismatch_count / total_reads,
+                                        barcode_mismatch_rate=barcode_mismatch_count / total_reads,
+                                        estimated_recombination_rate=estimated_recombination_count / total_reads)
+
+    return paired_guide_counts, qc_stats

@@ -305,6 +305,30 @@ class TestPgmap(unittest.TestCase):
         self.assertEqual(paired_guide_counts[("ACT", "GGC", "TTTT")], 1)
         self.assertEqual(sum(paired_guide_counts.values()), 2)
 
+    def test_counter_with_qc_hardcoded_test_data(self):
+        barcodes = {"AAAA", "CCCC", "TTTT"}
+        gRNA_mappings = {"ACT": {"CAG", "GGC", "TTG"},
+                         "CCC": {"AAA"}}
+        candidate_reads = [PairedRead("ACT", "GAA", "AAAA"), # gRNA2: 2 error
+                           PairedRead("AGT", "CGG", "CCCA"), # gRNA1, gRNA2, barcode: 1 error
+                           PairedRead("ATT", "GAC", "TTTG"), # gRNA1, gRNA2, barcode: 1 error
+                           PairedRead("CGG", "CAG", "TTCC"), # gRNA1: 2 error, barcode: 2 error
+                           PairedRead("ACT", "CCC", "TTTT")] # no errors, but recombination
+
+        paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
+            candidate_reads, gRNA_mappings, barcodes)
+
+        self.assertEqual(paired_guide_counts[("ACT", "CAG", "CCCC")], 1)
+        self.assertEqual(paired_guide_counts[("ACT", "GGC", "TTTT")], 1)
+        self.assertEqual(sum(paired_guide_counts.values()), 2)
+
+        self.assertEqual(qc_stats.total_reads, 5)
+        self.assertEqual(qc_stats.discard_rate, 3 / 5)
+        self.assertEqual(qc_stats.gRNA1_mismatch_rate, 1 / 5)
+        self.assertEqual(qc_stats.gRNA2_mismatch_rate, 1 / 5)
+        self.assertEqual(qc_stats.barcode_mismatch_rate, 1 / 5)
+        self.assertEqual(qc_stats.estimated_recombination_rate, 1 / 5)
+
     # TODO separate these into own test module?
     def test_arg_parse_happy_case(self):
         args = cli._parse_args(["--fastq", TWO_READ_R1_PATH, TWO_READ_I1_PATH,

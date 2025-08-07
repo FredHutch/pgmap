@@ -333,7 +333,7 @@ class TestPgmap(unittest.TestCase):
         self.assertEqual(qc_stats.gRNA1_mismatch_rate, 1 / 5)
         self.assertEqual(qc_stats.gRNA2_mismatch_rate, 1 / 5)
         self.assertEqual(qc_stats.barcode_mismatch_rate, 1 / 5)
-        self.assertEqual(qc_stats.estimated_recombination_rate, 1 / 5)
+        self.assertEqual(qc_stats.estimated_recombination_rate, 1 / 3)
         self.assertEqual(qc_stats.gRNA1_distance_mean, 1.0)
         self.assertEqual(qc_stats.gRNA2_distance_mean, 1.0)
         self.assertEqual(qc_stats.barcode_distance_mean, 0.5)

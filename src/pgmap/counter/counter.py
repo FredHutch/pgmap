@@ -115,6 +115,7 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
     gRNA1_mismatch_count = 0
     gRNA2_mismatch_count = 0
     barcode_mismatch_count = 0
+    gRNAs_align_count = 0
     estimated_recombination_count = 0
 
     # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
@@ -148,9 +149,12 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
         else:
             gRNA2_mismatch_count += 1
 
-        if gRNA1 and gRNA2 and gRNA2 not in gRNA_mappings[gRNA1]:
-            recombination = True
-            estimated_recombination_count += 1
+        if gRNA1 and gRNA2:
+            gRNAs_align_count += 1
+
+            if gRNA2 not in gRNA_mappings[gRNA1]:
+                recombination = True
+                estimated_recombination_count += 1
 
         barcode_score, barcode = max((pairwise_aligner.edit_distance_score(
             paired_read.barcode_candidate, reference), reference) for reference in barcodes)
@@ -188,7 +192,7 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
                                         gRNA1_mismatch_rate=gRNA1_mismatch_count / total_reads,
                                         gRNA2_mismatch_rate=gRNA2_mismatch_count / total_reads,
                                         barcode_mismatch_rate=barcode_mismatch_count / total_reads,
-                                        estimated_recombination_rate=estimated_recombination_count / total_reads,
+                                        estimated_recombination_rate=estimated_recombination_count / gRNAs_align_count,
                                         gRNA1_distance_mean=gRNA1_distance_mean,
                                         gRNA2_distance_mean=gRNA2_distance_mean,
                                         barcode_distance_mean=barcode_distance_mean,

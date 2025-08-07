@@ -3,7 +3,7 @@ import os
 import sys
 
 from pgmap.counter import counter
-from pgmap.io import barcode_reader, library_reader, counts_writer
+from pgmap.io import barcode_reader, library_reader, counts_writer, quality_control_statistics_writer
 from pgmap.trimming import read_trimmer
 from pgmap.model.trim_coordinate import TrimCoordinate
 from pgmap.model.trim_strategy import TrimStrategy, DEFAULT_TWO_READ_TRIM_STRATEGY, DEFAULT_THREE_READ_TRIM_STRATEGY
@@ -25,8 +25,14 @@ def get_counts(args: argparse.Namespace):
 
     candidate_reads = read_trimmer.trim(args.fastq, args.trim_strategy)
 
-    paired_guide_counts = counter.get_counts(
-        candidate_reads, gRNA_mappings, barcodes, gRNA1_error_tolerance=args.gRNA1_error, gRNA2_error_tolerance=args.gRNA2_error, barcode_error_tolerance=args.barcode_error)
+    if args.quality_control:
+        paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
+            candidate_reads, gRNA_mappings, barcodes, gRNA1_error_tolerance=args.gRNA1_error, gRNA2_error_tolerance=args.gRNA2_error, barcode_error_tolerance=args.barcode_error)
+
+        quality_control_statistics_writer.write_quality_control_statistics(args, qc_stats)
+    else:
+        paired_guide_counts = counter.get_counts(
+            candidate_reads, gRNA_mappings, barcodes, gRNA1_error_tolerance=args.gRNA1_error, gRNA2_error_tolerance=args.gRNA2_error, barcode_error_tolerance=args.barcode_error)
 
     counts_writer.write_counts(
         args.output, paired_guide_counts, barcodes, id_mapping)
@@ -46,6 +52,8 @@ def _parse_args(args: list[str]) -> argparse.Namespace:
     # TODO check can write to this path?
     parser.add_argument("-o", "--output", required=False,
                         help="Output file path to populate with the counts for each paired guide and sample. If not provided the counts will be output in STDOUT.")
+    parser.add_argument("-q", "--quality-control", required=False,
+                        help="Output file path to populate with quality control statistics for the reads. If not provided quality control statistics will not be computed.")
     parser.add_argument("--trim-strategy", required=True, type=_check_trim_strategy,
                         help="The trim strategy used to extract guides and barcodes. " +
                              "A custom trim strategy should be formatted as as comma separate list of trim coordinates for gRNA1, gRNA2, and the barcode. " +

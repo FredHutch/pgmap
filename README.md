@@ -67,6 +67,7 @@ You'll need to declare four files (we have example data to work with):
 | -l LIBRARY, --library LIBRARY | File containing annotated pgRNA information including the pgRNA id and both guide sequences. |
 | -b BARCODES, --barcodes BARCODES | File containing sample barcodes including the barcode sequence and the sample id. |
 | -o OUTPUT, --output OUTPUT | Output file path to populate with the counts for each paired guide and sample. If not provided the counts will be output in STDOUT. |
+| -q QUALITY_CONTROL, --quality_control QUALITY_CONTROL | Quality control file path to populate with metadata and aggregate statistics about the data. If not provided quality control statistics will not be computed. |
 | --trim-strategy TRIM_STRATEGY | The trim strategy used to extract guides and barcodes. A custom trim strategy should be formatted as as comma separate list of trim coordinates for gRNA1, gRNA2, and the barcode. Each trim coordinate should contain three zero indexed integers giving the file index relative to the order provided in --fastq, the inclusive start index of the trim, and the exclusive end index of the trim. The indices within the trim coordinate should be separated by colon. For convenience the options "two-read" and "three-read" map to default values "0:0:20,1:1:21,1:160:166" and "0:0:20,1:1:21,2:0:6" respectively. The two read strategy should have fastqs R1 and I1 in that order. The three read strategy should have fastqs R1, I1, and I2 in that order. |
 | --gRNA1-error GRNA1_ERROR | The number of substituted base pairs to allow in gRNA1. Must be less than 3. Defaults to 1. |
 | --gRNA2-error GRNA2_ERROR | The number of substituted base pairs to allow in gRNA2. Must be less than 3. Defaults to 1. |
@@ -137,3 +138,74 @@ As an example here is the head of the output from the [usage example](#usage-exa
 | AADAC_AADACL2_pg15 | GGTATTTCTGGAGATAGTGC | GTGATGTATTCATCTGAAAG | 0 | 0 | 0 | 0 | 0 |
 | AADAC_AADACL2_pg16 | GGTATTTCTGGAGATAGTGC | TGGGGGCAATTTAGCAACAG | 0 | 0 | 0 | 0 | 0 |
 | AADAC_AADACL2_pg2 | AAGTCTGAAGCACTAAGAAG | GAAAAAATTTGACTGCAGCA | 0 | 0 | 0 | 0 | 0 |
+
+## Quality Control
+
+`pgmap` can optionally compute quality control statistics for a run using the `quality-control` argument. These include information about the run (the input used, the version of pgmap) as well as aggregate statistics about the data including error rates and mean alignment distances and variances.
+
+The following quality control statistics are computed:
+
+| Statistic (type) | Description |
+| - | - |
+| total_reads (int) | The total amount of reads regardless of content. |
+| discard_rate (float) | The total rate from 0 to 1 of any kind of discarding of reads. |
+| gRNA1_mismatch_rate (float) | The rate at which gRNA1 candidates do not match a library gRNA1 allowing error tolerances. |
+| gRNA2_mismatch_rate (float) | The rate at which gRNA2 candidates do not match a library gRNA2 allowing error tolerances. |
+| barcode_mismatch_rate (float) | The rate at which barcode candidates do not match a library barcode allowing error tolerances. |
+| estimated_recombination_rate (float) | The rate at which gRNA1 and gRNA2 candidates are aligned, but the combination of gRNA1 and gRNA2 is not a valid pairing from the library. |
+| gRNA1_distance_mean (float) | The mean distance that accepted gRNA1 candidates vary from the closest library gRNA1. |
+| gRNA2_distance_mean (float) | The mean distance that accepted gRNA1 candidates vary from the closest library gRNA2. |
+| barcode_distance_mean (float) | The mean distance that accepted barcode candidates vary from the closest reference barcode. |
+| gRNA1_distance_variance (float) | The variance of the distances that accepted gRNA1 candidates vary from the closest library gRNA1. |
+| gRNA2_distance_variance (float) | The variances of the distances that accepted gRNA2 candidates vary from the closest library gRNA2. |
+| barcode_distance_variance (float) | The variances of the distances that accepted barcode candidates vary from the closest reference barcode. |
+
+Note that any rates are given as float values from 0 to 1 and not percentage values. `pgmap` writes a [JSON](https://en.wikipedia.org/wiki/JSON) file to the path passed into the `quality-control` argument. Here are the quality control statistics computed for the [usage example](#usage-example).
+
+```JSON
+{
+    "input": {
+        "fastq": [
+            "example-data/two-read-strategy/240123_VH01189_224_AAFGFNYM5/Undetermined_S0_R1_001_Sampled10k.fastq.gz",
+            "example-data/two-read-strategy/240123_VH01189_224_AAFGFNYM5/Undetermined_S0_I1_001_Sampled10k.fastq.gz"
+        ],
+        "library": "example-data/pgPEN-library/paralog_pgRNA_annotations.txt",
+        "barcodes": "example-data/two-read-strategy/240123_VH01189_224_AAFGFNYM5/barcode_ref_file_revcomp.txt",
+        "output": null,
+        "quality_control": "qc.json",
+        "trim_strategy": [
+            [
+                0,
+                0,
+                20
+            ],
+            [
+                1,
+                1,
+                21
+            ],
+            [
+                1,
+                160,
+                166
+            ]
+        ],
+        "gRNA1_error": 1,
+        "gRNA2_error": 1,
+        "barcode_error": 1
+    },
+    "version": "1.1.0",
+    "total_reads": 10000,
+    "discard_rate": 0.738,
+    "gRNA1_mismatch_rate": 0.4473,
+    "gRNA2_mismatch_rate": 0.5957,
+    "barcode_mismatch_rate": 0.5476,
+    "estimated_recombination_rate": 0.3035311795642374,
+    "gRNA1_distance_mean": 0.03129770992366412,
+    "gRNA2_distance_mean": 0.13282442748091636,
+    "barcode_distance_mean": 0.12366412213740446,
+    "gRNA1_distance_variance": 0.03031816327719825,
+    "gRNA2_distance_variance": 0.11518209894528267,
+    "barcode_distance_variance": 0.10837130703338971
+}
+```

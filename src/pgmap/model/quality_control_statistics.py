@@ -17,3 +17,9 @@ class QualityControlStatistics(typing.NamedTuple):
     gRNA2_mismatch_rate: float
     barcode_mismatch_rate: float
     estimated_recombination_rate: float
+    gRNA1_distance_mean: float
+    gRNA2_distance_mean: float
+    barcode_distance_mean: float
+    gRNA1_distance_variance: float
+    gRNA2_distance_variance: float
+    barcode_distance_variance: float

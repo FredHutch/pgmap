@@ -311,7 +311,7 @@ class TestPgmap(unittest.TestCase):
                          "CCC": {"AAA"}}
         candidate_reads = [PairedRead("ACT", "GAA", "AAAA"), # gRNA2: 2 error
                            PairedRead("AGT", "CGG", "CCCA"), # gRNA1, gRNA2, barcode: 1 error
-                           PairedRead("ATT", "GAC", "TTTG"), # gRNA1, gRNA2, barcode: 1 error
+                           PairedRead("ATT", "GAC", "TTTT"), # gRNA1, gRNA2: 1 error. barcode: 0 error
                            PairedRead("CGG", "CAG", "TTCC"), # gRNA1: 2 error, barcode: 2 error
                            PairedRead("ACT", "CCC", "TTTT")] # no errors, but recombination
 
@@ -328,6 +328,12 @@ class TestPgmap(unittest.TestCase):
         self.assertEqual(qc_stats.gRNA2_mismatch_rate, 1 / 5)
         self.assertEqual(qc_stats.barcode_mismatch_rate, 1 / 5)
         self.assertEqual(qc_stats.estimated_recombination_rate, 1 / 5)
+        self.assertEqual(qc_stats.gRNA1_distance_mean, 1.0)
+        self.assertEqual(qc_stats.gRNA2_distance_mean, 1.0)
+        self.assertEqual(qc_stats.barcode_distance_mean, 0.5)
+        self.assertEqual(qc_stats.gRNA1_distance_variance, 0)
+        self.assertEqual(qc_stats.gRNA2_distance_variance, 0)
+        self.assertEqual(qc_stats.barcode_distance_variance, 1 / 4)
 
     # TODO separate these into own test module?
     def test_arg_parse_happy_case(self):

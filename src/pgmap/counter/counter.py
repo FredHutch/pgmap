@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Counter, Iterable
+from typing import Counter, Iterable, Optional
 import itertools
 
 from pgmap.model.paired_read import PairedRead
@@ -91,6 +91,15 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
     barcode_mismatch_count = 0
     estimated_recombination_count = 0
 
+    # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
+    gRNA1_distance_mean = 0
+    gRNA2_distance_mean = 0
+    barcode_distance_mean = 0
+    gRNA1_distance_sk = 0
+    gRNA2_distance_sk = 0
+    barcode_distance_sk = 0
+    k = 1
+
     gRNA1_cached_aligner = grna_cached_aligner.construct_grna_error_alignment_cache(
         gRNA_mappings.keys(), gRNA1_error_tolerance)
 
@@ -104,12 +113,12 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
         recombination = False
 
         if paired_read.gRNA1_candidate in gRNA1_cached_aligner:
-            gRNA1, _ = gRNA1_cached_aligner[paired_read.gRNA1_candidate]
+            gRNA1, gRNA1_distance = gRNA1_cached_aligner[paired_read.gRNA1_candidate]
         else:
             gRNA1_mismatch_count += 1
 
         if paired_read.gRNA2_candidate in gRNA2_cached_aligner:
-            gRNA2, _ = gRNA2_cached_aligner[paired_read.gRNA2_candidate]
+            gRNA2, gRNA2_distance = gRNA2_cached_aligner[paired_read.gRNA2_candidate]
         else:
             gRNA2_mismatch_count += 1
 
@@ -120,22 +129,59 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
         barcode_score, barcode = max((pairwise_aligner.edit_distance_score(
             paired_read.barcode_candidate, reference), reference) for reference in barcodes)
 
-        if (len(barcode) - barcode_score) > barcode_error_tolerance:
+        barcode_distance = (len(barcode) - barcode_score)
+
+        if barcode_distance > barcode_error_tolerance:
             barcode_mismatch_count += 1
             barcode = None
 
         if gRNA1 and gRNA2 and barcode and not recombination:
             paired_guide_counts[(gRNA1, gRNA2, barcode)] += 1
+
+            gRNA1_distance_mean, gRNA1_distance_sk = _welford_step(
+                k, gRNA1_distance, gRNA1_distance_mean, gRNA1_distance_sk)
+
+            gRNA2_distance_mean, gRNA2_distance_sk = _welford_step(
+                k, gRNA2_distance, gRNA2_distance_mean, gRNA2_distance_sk)
+
+            barcode_distance_mean, barcode_distance_sk = _welford_step(
+                k, barcode_distance, barcode_distance_mean, barcode_distance_sk)
+
+            k += 1
         else:
             discard_count += 1
 
         total_reads += 1
+
+    # if total_reads == 0:
+    #     raise ValueError("Cannot compute QC statistics for reads with length 0.")
+
+    # TODO handle total reads 0 and k = 1
 
     qc_stats = QualityControlStatistics(total_reads=total_reads,
                                         discard_rate=discard_count / total_reads,
                                         gRNA1_mismatch_rate=gRNA1_mismatch_count / total_reads,
                                         gRNA2_mismatch_rate=gRNA2_mismatch_count / total_reads,
                                         barcode_mismatch_rate=barcode_mismatch_count / total_reads,
-                                        estimated_recombination_rate=estimated_recombination_count / total_reads)
+                                        estimated_recombination_rate=estimated_recombination_count / total_reads,
+                                        gRNA1_distance_mean=gRNA1_distance_mean,
+                                        gRNA2_distance_mean=gRNA2_distance_mean,
+                                        barcode_distance_mean=barcode_distance_mean,
+                                        gRNA1_distance_variance=gRNA1_distance_sk /
+                                        (k - 1),
+                                        gRNA2_distance_variance=gRNA2_distance_sk /
+                                        (k - 1),
+                                        barcode_distance_variance=barcode_distance_sk /
+                                        (k - 1))
 
     return paired_guide_counts, qc_stats
+
+
+def _welford_step(k: int, xk: float, current_mean: Optional[float], current_sk: Optional[float]):
+    if k == 1:
+        return xk, 0
+
+    new_mean = current_mean + (xk - current_mean) / k
+    new_sk = current_sk + (xk - current_mean) * (xk - new_mean)
+
+    return new_mean, new_sk

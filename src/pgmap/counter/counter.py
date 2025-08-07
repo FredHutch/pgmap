@@ -81,7 +81,33 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
                             gRNA1_error_tolerance: int = 1,
                             gRNA2_error_tolerance: int = 1,
                             barcode_error_tolerance: int = 1) -> tuple[Counter[tuple[str, str, str]], QualityControlStatistics]:
-    # TODO docs
+    """
+    Count paired guides for each sample barcode with tolerance for errors. gRNA1 matchs only through
+    perfect alignment. gRNA2 aligns if there is a match of a known (gRNA1, gRNA2) pairing having hamming distance
+    within the gRNA2 error tolerance. Finally the barcode aligns if there is a match aligned by edit distance
+    within a separate barcode error tolerance.
+
+    Additionally, compute quality control statistics for the reads. This function may be less efficient than
+    getting counts without quality control statistics due to the need to fully align all parts of a candidate read.
+
+    Args:
+        paired_reads (Iterable[PairedRead]): An iterable producing the candidate reads to be counted. Can be
+        generator to minimize memory usage.
+        gRNA_mappings (dict[str, set[str]]): The known mappings of each reference library gRNA1 to the set of gRNA2s
+        the gRNA1 is paired with.
+        barcodes (set[str]): The sample barcode sequences.
+        gRNA1_error_tolerance (int): The error tolerance for the hamming distance a gRNA1 candidate can be to the
+        reference gRNA1.
+        gRNA2_error_tolerance (int): The error tolerance for the hamming distance a gRNA2 candidate can be to the
+        reference gRNA2.
+        barcode_error_tolerance (int): The error tolerance for the edit distance a barcode candidate can be to the
+        reference barcode.
+
+    Returns:
+        paired_guide_counts (Counter[tuple[str, str, str]]): The counts of each (gRNA1, gRNA2, barcode) detected
+        within the paired reads.
+        quality_control_statistics (QualityControlStatistics): Quality control statistics for the paired reads.
+    """
     paired_guide_counts = Counter()
 
     total_reads = 0

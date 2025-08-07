@@ -3,13 +3,29 @@ import typing
 
 class QualityControlStatistics(typing.NamedTuple):
     """
-    TODO docs
-    A single paired read containing a candidate for counting.
+    A summary of quality control statistics for candidate reads.
 
     Attributes:
-        gRNA1_candidate (str): The candidate gRNA1.
-        gRNA2_candidate (str): The candidate gRNA2.
-        barcode_candidate (str): The candidate barcode.
+        total_reads (int): The total amount of reads regardless of content.
+        discard_rate (float): The total rate from 0 to 1 of any kind of discarding of reads.
+        gRNA1_mismatch_rate (float): The rate at which gRNA1 candidates do not match a library gRNA1
+        allowing error tolerances.
+        gRNA2_mismatch_rate (float): The rate at which gRNA2 candidates do not match a library gRNA2
+        allowing error tolerances.
+        barcode_mismatch_rate (float): The rate at which barcode candidates do not match a library barcode
+        allowing error tolerances.
+        gRNA1_distance_mean (float): The mean distance that accepted gRNA1 candidates vary from the closest
+        library gRNA1.
+        gRNA2_distance_mean (float): The mean distance that accepted gRNA1 candidates vary from the closest
+        library gRNA2.
+        barcode_distance_mean (float): The mean distance that accepted barcode candidates vary from the closest
+        reference barcode.
+        gRNA1_distance_variance (float): The variance of the distances that accepted gRNA1 candidates vary from the closest
+        library gRNA1.
+        gRNA2_distance_variance (float): The variances of the distances that accepted gRNA2 candidates vary from the closest
+        library gRNA2.
+        barcode_distance_variance (float): The variances of the distances that accepted barcode candidates vary from the closest
+        reference barcode.
     """
     total_reads: int
     discard_rate: float

@@ -53,7 +53,7 @@ def _parse_args(args: list[str]) -> argparse.Namespace:
     parser.add_argument("-o", "--output", required=False,
                         help="Output file path to populate with the counts for each paired guide and sample. If not provided the counts will be output in STDOUT.")
     parser.add_argument("-q", "--quality-control", required=False,
-                        help="Output file path to populate with quality control statistics for the reads. If not provided quality control statistics will not be computed.")
+                        help="Quality control file path to populate with metadata and aggregate statistics about the data. If not provided quality control statistics will not be computed.")
     parser.add_argument("--trim-strategy", required=True, type=_check_trim_strategy,
                         help="The trim strategy used to extract guides and barcodes. " +
                              "A custom trim strategy should be formatted as as comma separate list of trim coordinates for gRNA1, gRNA2, and the barcode. " +

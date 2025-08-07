@@ -153,10 +153,10 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
 
         total_reads += 1
 
-    # if total_reads == 0:
-    #     raise ValueError("Cannot compute QC statistics for reads with length 0.")
+    if total_reads == 0:
+        raise ValueError("Cannot compute QC statistics for reads with length 0.")
 
-    # TODO handle total reads 0 and k = 1
+    # TODO handle k = 1
 
     qc_stats = QualityControlStatistics(total_reads=total_reads,
                                         discard_rate=discard_count / total_reads,

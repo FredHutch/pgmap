@@ -335,6 +335,16 @@ class TestPgmap(unittest.TestCase):
         self.assertEqual(qc_stats.gRNA2_distance_variance, 0)
         self.assertEqual(qc_stats.barcode_distance_variance, 1 / 4)
 
+    def test_counter_with_qc_empty_data(self):
+        barcodes = {"AAAA", "CCCC", "TTTT"}
+        gRNA_mappings = {"ACT": {"CAG", "GGC", "TTG"},
+                         "CCC": {"AAA"}}
+        candidate_reads = []
+
+        with self.assertRaises(ValueError):
+            paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
+                candidate_reads, gRNA_mappings, barcodes)
+
     # TODO separate these into own test module?
     def test_arg_parse_happy_case(self):
         args = cli._parse_args(["--fastq", TWO_READ_R1_PATH, TWO_READ_I1_PATH,

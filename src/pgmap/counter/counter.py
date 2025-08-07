@@ -154,9 +154,8 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
         total_reads += 1
 
     if total_reads == 0:
-        raise ValueError("Cannot compute QC statistics for reads with length 0.")
-
-    # TODO handle k = 1
+        raise ValueError(
+            "Cannot compute QC statistics for reads with length 0.")
 
     qc_stats = QualityControlStatistics(total_reads=total_reads,
                                         discard_rate=discard_count / total_reads,
@@ -168,11 +167,11 @@ def get_counts_and_qc_stats(paired_reads: Iterable[PairedRead],
                                         gRNA2_distance_mean=gRNA2_distance_mean,
                                         barcode_distance_mean=barcode_distance_mean,
                                         gRNA1_distance_variance=gRNA1_distance_sk /
-                                        (k - 1),
+                                        (k - 1) if k > 1 else 0,
                                         gRNA2_distance_variance=gRNA2_distance_sk /
-                                        (k - 1),
+                                        (k - 1) if k > 1 else 0,
                                         barcode_distance_variance=barcode_distance_sk /
-                                        (k - 1))
+                                        (k - 1) if k > 1 else 0)
 
     return paired_guide_counts, qc_stats
 

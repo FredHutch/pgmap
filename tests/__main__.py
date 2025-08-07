@@ -309,11 +309,15 @@ class TestPgmap(unittest.TestCase):
         barcodes = {"AAAA", "CCCC", "TTTT"}
         gRNA_mappings = {"ACT": {"CAG", "GGC", "TTG"},
                          "CCC": {"AAA"}}
-        candidate_reads = [PairedRead("ACT", "GAA", "AAAA"), # gRNA2: 2 error
-                           PairedRead("AGT", "CGG", "CCCA"), # gRNA1, gRNA2, barcode: 1 error
-                           PairedRead("ATT", "GAC", "TTTT"), # gRNA1, gRNA2: 1 error. barcode: 0 error
-                           PairedRead("CGG", "CAG", "TTCC"), # gRNA1: 2 error, barcode: 2 error
-                           PairedRead("ACT", "CCC", "TTTT")] # no errors, but recombination
+        candidate_reads = [PairedRead("ACT", "CCC", "AAAA"),  # gRNA2: 2 error
+                           # gRNA1, gRNA2, barcode: 1 error
+                           PairedRead("AGT", "CGG", "CCCA"),
+                           # gRNA1, gRNA2: 1 error. barcode: 0 error
+                           PairedRead("ATT", "GAC", "TTTT"),
+                           # gRNA1: 2 error, barcode: 2 error
+                           PairedRead("CGG", "CAG", "TTCC"),
+                           # no errors, but recombination
+                           PairedRead("ACT", "AAA", "TTTT")]
 
         paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
             candidate_reads, gRNA_mappings, barcodes)
@@ -344,6 +348,34 @@ class TestPgmap(unittest.TestCase):
         with self.assertRaises(ValueError):
             paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
                 candidate_reads, gRNA_mappings, barcodes)
+
+    def test_counter_with_qc_single_match_read_data(self):
+        barcodes = {"AAAA", "CCCC", "TTTT"}
+        gRNA_mappings = {"ACT": {"CAG", "GGC", "TTG"},
+                         "CCC": {"AAA"}}
+        # gRNA1, gRNA2: 1 error. barcode: 0 error
+        candidate_reads = [PairedRead("ATT", "GAC", "TTTT"),
+                           # no errors, but recombination
+                           PairedRead("ACT", "AAA", "TTTT")]
+
+        paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
+            candidate_reads, gRNA_mappings, barcodes)
+
+        self.assertEqual(paired_guide_counts[("ACT", "GGC", "TTTT")], 1)
+        self.assertEqual(sum(paired_guide_counts.values()), 1)
+
+        self.assertEqual(qc_stats.total_reads, 2)
+        self.assertEqual(qc_stats.discard_rate, 1 / 2)
+        self.assertEqual(qc_stats.gRNA1_mismatch_rate, 0)
+        self.assertEqual(qc_stats.gRNA2_mismatch_rate, 0)
+        self.assertEqual(qc_stats.barcode_mismatch_rate, 0)
+        self.assertEqual(qc_stats.estimated_recombination_rate, 1 / 2)
+        self.assertEqual(qc_stats.gRNA1_distance_mean, 1.0)
+        self.assertEqual(qc_stats.gRNA2_distance_mean, 1.0)
+        self.assertEqual(qc_stats.barcode_distance_mean, 0)
+        self.assertEqual(qc_stats.gRNA1_distance_variance, 0)
+        self.assertEqual(qc_stats.gRNA2_distance_variance, 0)
+        self.assertEqual(qc_stats.barcode_distance_variance, 0)
 
     # TODO separate these into own test module?
     def test_arg_parse_happy_case(self):

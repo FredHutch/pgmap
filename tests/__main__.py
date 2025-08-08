@@ -1,9 +1,11 @@
 import unittest
 import argparse
 import csv
+import json
 import os
 import uuid
 from collections import Counter
+from importlib.metadata import version
 
 from pgmap.io import barcode_reader, fastx_reader, library_reader
 from pgmap.trimming import read_trimmer
@@ -305,6 +307,78 @@ class TestPgmap(unittest.TestCase):
         self.assertEqual(paired_guide_counts[("ACT", "GGC", "TTTT")], 1)
         self.assertEqual(sum(paired_guide_counts.values()), 2)
 
+    def test_counter_with_qc_hardcoded_test_data(self):
+        barcodes = {"AAAA", "CCCC", "TTTT"}
+        gRNA_mappings = {"ACT": {"CAG", "GGC", "TTG"},
+                         "CCC": {"AAA"}}
+        candidate_reads = [PairedRead("ACT", "CCC", "AAAA"),  # gRNA2: 2 error
+                           # gRNA1, gRNA2, barcode: 1 error
+                           PairedRead("AGT", "CGG", "CCCA"),
+                           # gRNA1, gRNA2: 1 error. barcode: 0 error
+                           PairedRead("ATT", "GAC", "TTTT"),
+                           # gRNA1: 2 error, barcode: 2 error
+                           PairedRead("CGG", "CAG", "TTCC"),
+                           # no errors, but recombination
+                           PairedRead("ACT", "AAA", "TTTT")]
+
+        paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
+            candidate_reads, gRNA_mappings, barcodes)
+
+        self.assertEqual(paired_guide_counts[("ACT", "CAG", "CCCC")], 1)
+        self.assertEqual(paired_guide_counts[("ACT", "GGC", "TTTT")], 1)
+        self.assertEqual(sum(paired_guide_counts.values()), 2)
+
+        self.assertEqual(qc_stats.total_reads, 5)
+        self.assertEqual(qc_stats.discard_rate, 3 / 5)
+        self.assertEqual(qc_stats.gRNA1_mismatch_rate, 1 / 5)
+        self.assertEqual(qc_stats.gRNA2_mismatch_rate, 1 / 5)
+        self.assertEqual(qc_stats.barcode_mismatch_rate, 1 / 5)
+        self.assertEqual(qc_stats.estimated_recombination_rate, 1 / 3)
+        self.assertEqual(qc_stats.gRNA1_distance_mean, 1.0)
+        self.assertEqual(qc_stats.gRNA2_distance_mean, 1.0)
+        self.assertEqual(qc_stats.barcode_distance_mean, 0.5)
+        self.assertEqual(qc_stats.gRNA1_distance_variance, 0)
+        self.assertEqual(qc_stats.gRNA2_distance_variance, 0)
+        self.assertEqual(qc_stats.barcode_distance_variance, 1 / 4)
+
+    def test_counter_with_qc_empty_data(self):
+        barcodes = {"AAAA", "CCCC", "TTTT"}
+        gRNA_mappings = {"ACT": {"CAG", "GGC", "TTG"},
+                         "CCC": {"AAA"}}
+        candidate_reads = []
+
+        with self.assertRaises(ValueError):
+            paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
+                candidate_reads, gRNA_mappings, barcodes)
+
+    def test_counter_with_qc_single_match_read_data(self):
+        barcodes = {"AAAA", "CCCC", "TTTT"}
+        gRNA_mappings = {"ACT": {"CAG", "GGC", "TTG"},
+                         "CCC": {"AAA"}}
+        # gRNA1, gRNA2: 1 error. barcode: 0 error
+        candidate_reads = [PairedRead("ATT", "GAC", "TTTT"),
+                           # no errors, but recombination
+                           PairedRead("ACT", "AAA", "TTTT")]
+
+        paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
+            candidate_reads, gRNA_mappings, barcodes)
+
+        self.assertEqual(paired_guide_counts[("ACT", "GGC", "TTTT")], 1)
+        self.assertEqual(sum(paired_guide_counts.values()), 1)
+
+        self.assertEqual(qc_stats.total_reads, 2)
+        self.assertEqual(qc_stats.discard_rate, 1 / 2)
+        self.assertEqual(qc_stats.gRNA1_mismatch_rate, 0)
+        self.assertEqual(qc_stats.gRNA2_mismatch_rate, 0)
+        self.assertEqual(qc_stats.barcode_mismatch_rate, 0)
+        self.assertEqual(qc_stats.estimated_recombination_rate, 1 / 2)
+        self.assertEqual(qc_stats.gRNA1_distance_mean, 1.0)
+        self.assertEqual(qc_stats.gRNA2_distance_mean, 1.0)
+        self.assertEqual(qc_stats.barcode_distance_mean, 0)
+        self.assertEqual(qc_stats.gRNA1_distance_variance, 0)
+        self.assertEqual(qc_stats.gRNA2_distance_variance, 0)
+        self.assertEqual(qc_stats.barcode_distance_variance, 0)
+
     # TODO separate these into own test module?
     def test_arg_parse_happy_case(self):
         args = cli._parse_args(["--fastq", TWO_READ_R1_PATH, TWO_READ_I1_PATH,
@@ -447,10 +521,14 @@ class TestPgmap(unittest.TestCase):
 
     def setUp(self):
         self.test_output_path = f"test_file_{uuid.uuid4().hex}.tsv"
+        self.test_qc_path = f"test_file_{uuid.uuid4().hex}.tsv"
 
     def tearDown(self):
         if os.path.exists(self.test_output_path):
             os.remove(self.test_output_path)
+
+        if os.path.exists(self.test_qc_path):
+            os.remove(self.test_qc_path)
 
     def test_main_happy_case(self):
         args = cli._parse_args(["--fastq", TWO_READ_R1_PATH, TWO_READ_I1_PATH,
@@ -554,6 +632,82 @@ class TestPgmap(unittest.TestCase):
         for k in paired_guide_counts:
             self.assertEqual(file_counts[k], paired_guide_counts[k])
 
+    def test_main_happy_case_with_quality_control(self):
+        args = cli._parse_args(["--fastq", TWO_READ_R1_PATH, TWO_READ_I1_PATH,
+                                "--library", PGPEN_ANNOTATION_PATH,
+                                "--barcodes", TWO_READ_BARCODES_PATH,
+                                "--output", self.test_output_path,
+                                "--quality-control", self.test_qc_path,
+                                "--trim-strategy", "two-read",
+                                "--gRNA1-error", "1",
+                                "--gRNA2-error", "1",
+                                "--barcode-error", "1"])
+        cli.get_counts(args)
+
+        self.assertTrue(os.path.exists(self.test_output_path))
+
+        barcodes = barcode_reader.read_barcodes(TWO_READ_BARCODES_PATH)
+
+        gRNA1s, gRNA2s, gRNA_mappings, id_mapping = library_reader.read_paired_guide_library_annotation(
+            PGPEN_ANNOTATION_PATH)
+
+        candidate_reads = read_trimmer.two_read_trim(
+            TWO_READ_R1_PATH, TWO_READ_I1_PATH)
+
+        paired_guide_counts, qc_stats = counter.get_counts_and_qc_stats(
+            candidate_reads, gRNA_mappings, barcodes)
+
+        file_counts = self.load_counts_from_output_file(
+            self.test_output_path, barcodes)
+
+        qc_output = self.load_qc_output(self.test_qc_path)
+
+        self.assertEqual(file_counts, paired_guide_counts)
+        self.assertEqual(qc_output["input"]["fastq"], [
+                         TWO_READ_R1_PATH, TWO_READ_I1_PATH])
+        self.assertEqual(qc_output["input"]["library"],
+                         PGPEN_ANNOTATION_PATH)
+        self.assertEqual(qc_output["input"]["barcodes"],
+                         TWO_READ_BARCODES_PATH)
+        self.assertEqual(qc_output["input"]["output"],
+                         self.test_output_path)
+        self.assertEqual(qc_output["input"]["quality_control"],
+                         self.test_qc_path)
+        self.assertEqual(qc_output["input"]["trim_strategy"],
+                         [[0, 0, 20], [1, 1, 21], [1, 160, 166]])
+        self.assertEqual(qc_output["input"]["gRNA1_error"],
+                         1)
+        self.assertEqual(qc_output["input"]["gRNA2_error"],
+                         1)
+        self.assertEqual(qc_output["input"]["barcode_error"],
+                         1)
+        self.assertEqual(qc_output["version"],
+                         version("pgmap"))
+        self.assertEqual(qc_output["total_reads"],
+                         qc_stats.total_reads)
+        self.assertEqual(qc_output["discard_rate"],
+                         qc_stats.discard_rate)
+        self.assertEqual(qc_output["gRNA1_mismatch_rate"],
+                         qc_stats.gRNA1_mismatch_rate)
+        self.assertEqual(qc_output["gRNA2_mismatch_rate"],
+                         qc_stats.gRNA2_mismatch_rate)
+        self.assertEqual(qc_output["barcode_mismatch_rate"],
+                         qc_stats.barcode_mismatch_rate)
+        self.assertEqual(qc_output["estimated_recombination_rate"],
+                         qc_stats.estimated_recombination_rate)
+        self.assertEqual(qc_output["gRNA1_distance_mean"],
+                         qc_stats.gRNA1_distance_mean)
+        self.assertEqual(qc_output["gRNA2_distance_mean"],
+                         qc_stats.gRNA2_distance_mean)
+        self.assertEqual(qc_output["barcode_distance_mean"],
+                         qc_stats.barcode_distance_mean)
+        self.assertEqual(qc_output["gRNA1_distance_variance"],
+                         qc_stats.gRNA1_distance_variance)
+        self.assertEqual(qc_output["gRNA2_distance_variance"],
+                         qc_stats.gRNA2_distance_variance)
+        self.assertEqual(qc_output["barcode_distance_variance"],
+                         qc_stats.barcode_distance_variance)
+
     def load_counts_from_output_file(self, output_path: str, barcodes: dict[str, str]) -> Counter[tuple[str, str, str]]:
         with open(output_path, 'r') as file:
             tsv_reader = csv.reader(file, delimiter='\t')
@@ -578,6 +732,10 @@ class TestPgmap(unittest.TestCase):
                     counts[(gRNA1, gRNA2, barcode)] += count
 
             return counts
+
+    def load_qc_output(self, qc_path: str) -> dict:
+        with open(qc_path, 'r') as file:
+            return json.load(file)
 
 
 if __name__ == "__main__":

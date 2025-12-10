@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.2 20190208//EN"
+                  "JATS-publishing1.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+<front>
+<journal-meta>
+<journal-id></journal-id>
+<journal-title-group>
+<journal-title>Journal of Open Source Software</journal-title>
+<abbrev-journal-title>JOSS</abbrev-journal-title>
+</journal-title-group>
+<issn publication-format="electronic">2475-9066</issn>
+<publisher>
+<publisher-name>Open Journals</publisher-name>
+</publisher>
+</journal-meta>
+<article-meta>
+<article-id pub-id-type="publisher-id">0</article-id>
+<article-id pub-id-type="doi">N/A</article-id>
+<title-group>
+<article-title>pgMAP: Paired Guide RNA Read Mapping from Dual-Targeting
+CRISPR Screens</article-title>
+</title-group>
+<contrib-group>
+<contrib contrib-type="author">
+<name>
+<surname>Fujimoto</surname>
+<given-names>Marissa H.</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<contrib contrib-type="author">
+<name>
+<surname>Savonen</surname>
+<given-names>Candace L.</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<contrib contrib-type="author">
+<name>
+<surname>O’Brien</surname>
+<given-names>Siobhan</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<contrib contrib-type="author">
+<name>
+<surname>Parrish</surname>
+<given-names>Phoebe C. R.</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+<xref ref-type="aff" rid="aff-2"/>
+<xref ref-type="aff" rid="aff-3"/>
+</contrib>
+<contrib contrib-type="author">
+<name>
+<surname>Groso</surname>
+<given-names>Daniel J.</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+<xref ref-type="aff" rid="aff-2"/>
+</contrib>
+<contrib contrib-type="author">
+<name>
+<surname>Thomas</surname>
+<given-names>James D.</given-names>
+</name>
+<xref ref-type="aff" rid="aff-2"/>
+<xref ref-type="aff" rid="aff-4"/>
+</contrib>
+<contrib contrib-type="author">
+<name>
+<surname>Bradley</surname>
+<given-names>Robert K.</given-names>
+</name>
+<xref ref-type="aff" rid="aff-2"/>
+<xref ref-type="aff" rid="aff-3"/>
+<xref ref-type="aff" rid="aff-4"/>
+</contrib>
+<contrib contrib-type="author" corresp="yes">
+<name>
+<surname>Berger</surname>
+<given-names>Alice H.</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+<xref ref-type="aff" rid="aff-2"/>
+<xref ref-type="aff" rid="aff-3"/>
+<xref ref-type="corresp" rid="cor-1"><sup>*</sup></xref>
+</contrib>
+<aff id="aff-1">
+<institution-wrap>
+<institution>Human Biology Division, Fred Hutchinson Cancer Center,
+Seattle, WA 98109, USA</institution>
+<institution-id institution-id-type="ROR">007ps6h72</institution-id>
+</institution-wrap>
+</aff>
+<aff id="aff-2">
+<institution-wrap>
+<institution>Computational Biology Program, Public Health Sciences
+Division, Fred Hutchinson Cancer Center, Seattle, WA 98109,
+USA</institution>
+<institution-id institution-id-type="ROR">007ps6h72</institution-id>
+</institution-wrap>
+</aff>
+<aff id="aff-3">
+<institution-wrap>
+<institution>Department of Genome Sciences, University of Washington,
+Seattle, WA 98195, USA</institution>
+<institution-id institution-id-type="ROR">00cvxb145</institution-id>
+</institution-wrap>
+</aff>
+<aff id="aff-4">
+<institution-wrap>
+<institution>Basic Sciences Division, Fred Hutchinson Cancer Center,
+Seattle, WA 98109, USA</institution>
+<institution-id institution-id-type="ROR">007ps6h72</institution-id>
+</institution-wrap>
+</aff>
+</contrib-group>
+<author-notes>
+<corresp id="cor-1">* E-mail: <email></email></corresp>
+</author-notes>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2025-06-03">
+<day>3</day>
+<month>6</month>
+<year>2025</year>
+</pub-date>
+<volume>¿VOL?</volume>
+<issue>¿ISSUE?</issue>
+<fpage>¿PAGE?</fpage>
+<permissions>
+<copyright-statement>Authors of papers retain copyright and release the
+work under a Creative Commons Attribution 4.0 International License (CC
+BY 4.0)</copyright-statement>
+<copyright-year>1970</copyright-year>
+<copyright-holder>The article authors</copyright-holder>
+<license license-type="open-access" xlink:href="https://creativecommons.org/licenses/by/4.0/">
+<license-p>Authors of papers retain copyright and release the work under
+a Creative Commons Attribution 4.0 International License (CC BY
+4.0)</license-p>
+</license>
+</permissions>
+<kwd-group kwd-group-type="author">
+<kwd>Python</kwd>
+<kwd>bioinformatics</kwd>
+<kwd>genomics</kwd>
+<kwd>CRISPR</kwd>
+</kwd-group>
+</article-meta>
+</front>
+<body>
+<sec id="summary">
+  <title>Summary</title>
+  <p>Genetic interactions occur when two or more genes interact to
+  produce a phenotype that differs from the effect of both genes
+  considered independently. Synthetic lethality is a type of genetic
+  interaction between two genes where the loss of either gene is
+  tolerated individually, but the loss of both genes results in a
+  reduction of cell viability. One possible application of synthetic
+  lethality is cancer therapies. The CRISPR-Cas system allows scalable
+  investigation of synthetic lethality directly in lab-cultured human
+  tumor cells. However, current tools for analyzing dual-targeting
+  CRISPR screens, which is the preferred method to study synthetic
+  lethality at scale, are poorly established compared to existing tools
+  for single-targeting CRISPR screens. We present pgMAP (paired guide
+  RNA MAPper): a command line tool built to read paired guide counts
+  from dual-targeting CRISPR screening sequencing data. By quantifying
+  the relative depletion and enrichment of paired guides between
+  different samples, pgMAP enables the discovery of genetic interactions
+  across many organisms, genetic backgrounds, tissues, and cancer
+  types.</p>
+</sec>
+<sec id="statement-of-need">
+  <title>Statement of Need</title>
+  <p>In recent years, several genome-scale, dual-targeting
+  CRISPR-mediated knockout screening approaches have been developed to
+  map genetic interactions in the human genome
+  (<xref alt="Dede et al., 2020" rid="ref-Dede2020-ks" ref-type="bibr">Dede
+  et al., 2020</xref>;
+  <xref alt="Gonatopoulos-Pournatzis et al., 2020" rid="ref-Gonatopoulos-Pournatzis2020-mv" ref-type="bibr">Gonatopoulos-Pournatzis
+  et al., 2020</xref>;
+  <xref alt="Ito et al., 2021" rid="ref-Ito2021-wn" ref-type="bibr">Ito
+  et al., 2021</xref>;
+  <xref alt="Köferle et al., 2022" rid="ref-Koferle2022-rs" ref-type="bibr">Köferle
+  et al., 2022</xref>;
+  <xref alt="Parrish et al., 2021" rid="ref-Parrish2021-pd" ref-type="bibr">Parrish
+  et al., 2021</xref>;
+  <xref alt="Tang et al., 2022" rid="ref-Tang2022-dp" ref-type="bibr">Tang
+  et al., 2022</xref>;
+  <xref alt="Thompson et al., 2021" rid="ref-Thompson2021-xv" ref-type="bibr">Thompson
+  et al., 2021</xref>). These methods enable functional profiling of
+  duplicated gene families and expand the range of potentially
+  targetable synthetic lethal interactions in cancer
+  (<xref alt="Dandage &amp; Landry, 2021" rid="ref-Dandage2021-sp" ref-type="bibr">Dandage
+  &amp; Landry, 2021</xref>;
+  <xref alt="Ryan et al., 2023" rid="ref-Ryan2023-bw" ref-type="bibr">Ryan
+  et al., 2023</xref>). However, computational methods for genetic
+  interaction mapping from human CRISPR screen data are poorly
+  established, which may impede interpretation of dual-targeting CRISPR
+  screen data and thus prevent identification of actionable synthetic
+  lethal targets.</p>
+  <p>pgMAP is a command line tool that processes raw sequencing data
+  into tables of counts per genetic perturbation. pgMAP is purpose-built
+  for genetic interaction analysis; rather than utilizing bioinformatics
+  tools designed for general-purpose alignment of DNA sequences, pgMAP
+  exploits the paired structure of dual-targeting CRISPR experiments to
+  efficiently map and count paired guides. Compared to previous
+  approaches, pgMAP produces equivalent results over three times faster
+  while requiring constant memory and disk space relative to the number
+  of reads in the raw sequencing data
+  (<xref alt="Table 1" rid="performance-table">Table 1</xref>). As a
+  general purpose tool for analyzing paired knockout CRISPR screen data,
+  pgMAP can be configured with parameters including error tolerances and
+  sequencing strategies to suit a wide berth of experimental
+  designs.</p>
+  <p>The paired guide counts data from pgMAP can be further analyzed
+  using the gimap R package to perform quality control and statistical
+  analysis of genetic interaction
+  (<xref alt="Savonen et al., 2025" rid="ref-Savonen2025-je" ref-type="bibr">Savonen
+  et al., 2025</xref>). Together pgMAP and gimap provide a complete
+  software suite for the end-to-end data analysis of paired knockout
+  CRISPR screens.</p>
+  <table-wrap>
+    <caption>
+      <p>Performance comparison of pgMAP and bowtie to count paired
+      guides from a pgPEN screen. Fastqs used from “Discovery of
+      synthetic lethal and tumor suppressor paralog pairs in the human
+      genome” by Parrish Et. Al 2021. Both benchmarks were run using
+      Hyperfine
+      (<xref alt="Peter, 2023" rid="ref-Peter_hyperfine_2023" ref-type="bibr">Peter,
+      2023</xref>) with parameters “–warmup 1 –runs 3” using a Macbook
+      Air M3 with 16 GB of memory.
+      *Bowtie was run with version 1.3.1 with parameters “-q -v 1 –best
+      –strata –all –sam -p 8” to align the both guide RNAs sequentially.
+      Intermediate file size refers to the sum of the two bam files
+      generated by piping the output from bowtie into samtools
+      (<xref alt="Danecek et al., 2021" rid="ref-10.1093U002FgigascienceU002Fgiab008" ref-type="bibr">Danecek
+      et al., 2021</xref>). A full pipeline built around bowtie would
+      include additional steps for mapping the alignment results into
+      paired guide counts and demultiplexing samples.
+      <styled-content id="performance-table"></styled-content>
+      **pgMAP was run with the default parameters of gRNA1-error 1,
+      gRNA2-error 1, and barcode-error 1.</p>
+    </caption>
+    <table>
+      <colgroup>
+        <col width="15%" />
+        <col width="13%" />
+        <col width="13%" />
+        <col width="13%" />
+        <col width="20%" />
+        <col width="26%" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Tool</th>
+          <th align="center">Mean (Minutes)</th>
+          <th align="center">Min (Minutes)</th>
+          <th align="center">Max (Minutes)</th>
+          <th align="center">Peak Memory Usage (GB)</th>
+          <th align="center">Intermediate File(s) Size (GB)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>bowtie pipeline*</td>
+          <td align="center">72.35</td>
+          <td align="center">71.69</td>
+          <td align="center">72.92</td>
+          <td align="center">0.026</td>
+          <td align="center">28.64</td>
+        </tr>
+        <tr>
+          <td>pgMAP**</td>
+          <td align="center">22.93</td>
+          <td align="center">22.22</td>
+          <td align="center">24.09</td>
+          <td align="center">0.157</td>
+          <td align="center">N/A</td>
+        </tr>
+      </tbody>
+    </table>
+  </table-wrap>
+</sec>
+<sec id="description-of-algorithm">
+  <title>Description of Algorithm</title>
+  <p>pgMAP’s counting algorithm takes advantage of the structure of
+  paired CRISPR guide libraries. Paired guide libraries are composed of
+  pairs of guide RNA sequences. While the number of unique guide RNA
+  pairs can be in the tens of thousands, there are orders of magnitude
+  fewer unique guide sequences. Therefore, it is possible to directly
+  hash all the guide sequences and efficiently map to them while reading
+  from sequencing data. To support error tolerance, pgMAP hashes every
+  possible error perturbed sequence within an error tolerance of each
+  reference guide sequence. With the suggested error tolerance of a
+  single substitution, pgMAP uses less than 200mb of memory when applied
+  to data generated using the pgPEN CRISPR library, which contains
+  ~33,000 pgRNAs
+  (<xref alt="Parrish et al., 2021" rid="ref-Parrish2021-pd" ref-type="bibr">Parrish
+  et al., 2021</xref>).</p>
+  <p>Compared to an approach using a general purpose aligner like bowtie
+  (<xref alt="Langmead &amp; Salzberg, 2012" rid="ref-Langmead2012-sz" ref-type="bibr">Langmead
+  &amp; Salzberg, 2012</xref>), there is no need to demultiplex
+  individual samples before aligning. Additionally, no intermediate
+  alignment files are generated by pgMAP and no pipeline of
+  bioinformatics tools is necessary to orchestrate individual steps.
+  pgMAP is implemented with Python and depends only on the Levenshtein
+  Python package for string distance calculations
+  (<xref alt="Necas et al., 2010" rid="ref-levenshtein" ref-type="bibr">Necas
+  et al., 2010</xref>).</p>
+  <fig>
+    <caption><p>Overview of the pgMAP algorithm. pgMAP first computes
+    and caches every guide RNA (gRNA) in the library annotation along
+    with every tolerated perturbation of each guide. Then the algorithm
+    steps through each sequencing read and trimming and hashes each
+    guide candidate against the reference alignment cache to count
+    guides. Barcode candidates are counted by directly checking each
+    Levenshtein distance to the reference sample barcodes. Finally, the
+    resulting paired guide and sample mappings are exported to a file
+    for subsequent analysis by the user.
+    <styled-content id="pgmap-algorithm-diagram"></styled-content></p></caption>
+    <graphic mimetype="image" mime-subtype="svg+xml" xlink:href="pgmap-algorithm.svg" />
+  </fig>
+</sec>
+<sec id="research-using-pgmap">
+  <title>Research Using pgMAP</title>
+  <p>pgMAP is currently being utilized in ongoing research projects in
+  the Berger lab, including follow-up work to previous paired gRNA
+  CRISPR screens
+  (<xref alt="Parrish et al., 2021" rid="ref-Parrish2021-pd" ref-type="bibr">Parrish
+  et al., 2021</xref>).</p>
+</sec>
+<sec id="acknowledgements">
+  <title>Acknowledgements</title>
+  <p>M. Fujimoto was supported by the NIH award R25HG012337.</p>
+  <p>S. O’Brien is a Washington Research Foundation postdoctoral
+  fellow.</p>
+  <p>This work was supported in part by NCI R01CA262556, the American
+  Cancer Society, and a pilot award from the Fred Hutch Translational
+  Data Science Integrated Research Center.</p>
+</sec>
+</body>
+<back>
+<ref-list>
+  <title></title>
+  <ref id="ref-Dede2020-ks">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Dede</surname><given-names>Merve</given-names></name>
+        <name><surname>McLaughlin</surname><given-names>Megan</given-names></name>
+        <name><surname>Kim</surname><given-names>Eiru</given-names></name>
+        <name><surname>Hart</surname><given-names>Traver</given-names></name>
+      </person-group>
+      <article-title>Multiplex enCas12a screens detect functional buffering among paralogs otherwise masked in monogenic Cas9 knockout screens</article-title>
+      <source>Genome Biol.</source>
+      <publisher-name>Springer Science; Business Media LLC</publisher-name>
+      <year iso-8601-date="2020-10">2020</year><month>10</month>
+      <volume>21</volume>
+      <issue>1</issue>
+      <pub-id pub-id-type="doi">10.1186/s13059-020-02173-2</pub-id>
+      <fpage>262</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Gonatopoulos-Pournatzis2020-mv">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Gonatopoulos-Pournatzis</surname><given-names>Thomas</given-names></name>
+        <name><surname>Aregger</surname><given-names>Michael</given-names></name>
+        <name><surname>Brown</surname><given-names>Kevin R</given-names></name>
+        <name><surname>Farhangmehr</surname><given-names>Shaghayegh</given-names></name>
+        <name><surname>Braunschweig</surname><given-names>Ulrich</given-names></name>
+        <name><surname>Ward</surname><given-names>Henry N</given-names></name>
+        <name><surname>Ha</surname><given-names>Kevin C H</given-names></name>
+        <name><surname>Weiss</surname><given-names>Alexander</given-names></name>
+        <name><surname>Billmann</surname><given-names>Maximilian</given-names></name>
+        <name><surname>Durbic</surname><given-names>Tanja</given-names></name>
+        <name><surname>Myers</surname><given-names>Chad L</given-names></name>
+        <name><surname>Blencowe</surname><given-names>Benjamin J</given-names></name>
+        <name><surname>Moffat</surname><given-names>Jason</given-names></name>
+      </person-group>
+      <article-title>Genetic interaction mapping and exon-resolution functional genomics with a hybrid Cas9-Cas12a platform</article-title>
+      <source>Nat. Biotechnol.</source>
+      <publisher-name>Springer Science; Business Media LLC</publisher-name>
+      <year iso-8601-date="2020-05">2020</year><month>05</month>
+      <volume>38</volume>
+      <issue>5</issue>
+      <pub-id pub-id-type="doi">10.1038/s41587-020-0437-z</pub-id>
+      <fpage>638</fpage>
+      <lpage>648</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Ito2021-wn">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Ito</surname><given-names>Takahiro</given-names></name>
+        <name><surname>Young</surname><given-names>Michael J</given-names></name>
+        <name><surname>Li</surname><given-names>Ruitong</given-names></name>
+        <name><surname>Jain</surname><given-names>Sidharth</given-names></name>
+        <name><surname>Wernitznig</surname><given-names>Andreas</given-names></name>
+        <name><surname>Krill-Burger</surname><given-names>John M</given-names></name>
+        <name><surname>Lemke</surname><given-names>Christopher T</given-names></name>
+        <name><surname>Monducci</surname><given-names>Davide</given-names></name>
+        <name><surname>Rodriguez</surname><given-names>Diego J</given-names></name>
+        <name><surname>Chang</surname><given-names>Liang</given-names></name>
+        <name><surname>Dutta</surname><given-names>Sanjukta</given-names></name>
+        <name><surname>Pal</surname><given-names>Debjani</given-names></name>
+        <name><surname>Paolella</surname><given-names>Brenton R</given-names></name>
+        <name><surname>Rothberg</surname><given-names>Michael V</given-names></name>
+        <name><surname>Root</surname><given-names>David E</given-names></name>
+        <name><surname>Johannessen</surname><given-names>Cory M</given-names></name>
+        <name><surname>Parida</surname><given-names>Laxmi</given-names></name>
+        <name><surname>Getz</surname><given-names>Gad</given-names></name>
+        <name><surname>Vazquez</surname><given-names>Francisca</given-names></name>
+        <name><surname>Doench</surname><given-names>John G</given-names></name>
+        <name><surname>Zamanighomi</surname><given-names>Mahdi</given-names></name>
+        <name><surname>Sellers</surname><given-names>William R</given-names></name>
+      </person-group>
+      <article-title>Paralog knockout profiling identifies DUSP4 and DUSP6 as a digenic dependence in MAPK pathway-driven cancers</article-title>
+      <source>Nat. Genet.</source>
+      <publisher-name>Springer Science; Business Media LLC</publisher-name>
+      <year iso-8601-date="2021-12">2021</year><month>12</month>
+      <volume>53</volume>
+      <issue>12</issue>
+      <pub-id pub-id-type="doi">10.1038/s41588-021-00967-z</pub-id>
+      <fpage>1664</fpage>
+      <lpage>1672</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Koferle2022-rs">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Köferle</surname><given-names>Anna</given-names></name>
+        <name><surname>Schlattl</surname><given-names>Andreas</given-names></name>
+        <name><surname>Hörmann</surname><given-names>Alexandra</given-names></name>
+        <name><surname>Thatikonda</surname><given-names>Venu</given-names></name>
+        <name><surname>Popa</surname><given-names>Alexandra</given-names></name>
+        <name><surname>Spreitzer</surname><given-names>Fiona</given-names></name>
+        <name><surname>Ravichandran</surname><given-names>Madhwesh C</given-names></name>
+        <name><surname>Supper</surname><given-names>Verena</given-names></name>
+        <name><surname>Oberndorfer</surname><given-names>Sarah</given-names></name>
+        <name><surname>Puchner</surname><given-names>Teresa</given-names></name>
+        <name><surname>Wieshofer</surname><given-names>Corinna</given-names></name>
+        <name><surname>Corcokovic</surname><given-names>Maja</given-names></name>
+        <name><surname>Reiser</surname><given-names>Christoph</given-names></name>
+        <name><surname>Wöhrle</surname><given-names>Simon</given-names></name>
+        <name><surname>Popow</surname><given-names>Johannes</given-names></name>
+        <name><surname>Pearson</surname><given-names>Mark</given-names></name>
+        <name><surname>Martinez</surname><given-names>Javier</given-names></name>
+        <name><surname>Weitzer</surname><given-names>Stefan</given-names></name>
+        <name><surname>Mair</surname><given-names>Barbara</given-names></name>
+        <name><surname>Neumüller</surname><given-names>Ralph A</given-names></name>
+      </person-group>
+      <article-title>Interrogation of cancer gene dependencies reveals paralog interactions of autosome and sex chromosome-encoded genes</article-title>
+      <source>Cell Rep.</source>
+      <publisher-name>Elsevier BV</publisher-name>
+      <year iso-8601-date="2022-04">2022</year><month>04</month>
+      <volume>39</volume>
+      <issue>2</issue>
+      <pub-id pub-id-type="doi">10.1016/j.celrep.2022.110636</pub-id>
+      <fpage>110636</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Parrish2021-pd">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Parrish</surname><given-names>Phoebe C R</given-names></name>
+        <name><surname>Thomas</surname><given-names>James D</given-names></name>
+        <name><surname>Gabel</surname><given-names>Austin M</given-names></name>
+        <name><surname>Kamlapurkar</surname><given-names>Shriya</given-names></name>
+        <name><surname>Bradley</surname><given-names>Robert K</given-names></name>
+        <name><surname>Berger</surname><given-names>Alice H</given-names></name>
+      </person-group>
+      <article-title>Discovery of synthetic lethal and tumor suppressor paralog pairs in the human genome</article-title>
+      <source>Cell Rep.</source>
+      <publisher-name>Elsevier BV</publisher-name>
+      <year iso-8601-date="2021-08">2021</year><month>08</month>
+      <volume>36</volume>
+      <issue>9</issue>
+      <pub-id pub-id-type="doi">10.1016/j.celrep.2021.109597</pub-id>
+      <fpage>109597</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Tang2022-dp">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Tang</surname><given-names>Shan</given-names></name>
+        <name><surname>Wu</surname><given-names>Xue</given-names></name>
+        <name><surname>Liu</surname><given-names>Jinghui</given-names></name>
+        <name><surname>Zhang</surname><given-names>Qiongsi</given-names></name>
+        <name><surname>Wang</surname><given-names>Xinyi</given-names></name>
+        <name><surname>Shao</surname><given-names>Shuai</given-names></name>
+        <name><surname>Gokbag</surname><given-names>Birkan</given-names></name>
+        <name><surname>Fan</surname><given-names>Kunjie</given-names></name>
+        <name><surname>Liu</surname><given-names>Xiaoqi</given-names></name>
+        <name><surname>Li</surname><given-names>Fuhai</given-names></name>
+        <name><surname>Cheng</surname><given-names>Lijun</given-names></name>
+        <name><surname>Li</surname><given-names>Lang</given-names></name>
+      </person-group>
+      <article-title>Generation of dual-gRNA library for combinatorial CRISPR screening of synthetic lethal gene pairs</article-title>
+      <source>STAR Protoc.</source>
+      <publisher-name>Elsevier BV</publisher-name>
+      <year iso-8601-date="2022-09">2022</year><month>09</month>
+      <volume>3</volume>
+      <issue>3</issue>
+      <pub-id pub-id-type="doi">10.1016/j.xpro.2022.101556</pub-id>
+      <fpage>101556</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Thompson2021-xv">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Thompson</surname><given-names>Nicola A</given-names></name>
+        <name><surname>Ranzani</surname><given-names>Marco</given-names></name>
+        <name><surname>Weyden</surname><given-names>Louise van der</given-names></name>
+        <name><surname>Iyer</surname><given-names>Vivek</given-names></name>
+        <name><surname>Offord</surname><given-names>Victoria</given-names></name>
+        <name><surname>Droop</surname><given-names>Alastair</given-names></name>
+        <name><surname>Behan</surname><given-names>Fiona</given-names></name>
+        <name><surname>Gonçalves</surname><given-names>Emanuel</given-names></name>
+        <name><surname>Speak</surname><given-names>Anneliese</given-names></name>
+        <name><surname>Iorio</surname><given-names>Francesco</given-names></name>
+        <name><surname>Hewinson</surname><given-names>James</given-names></name>
+        <name><surname>Harle</surname><given-names>Victoria</given-names></name>
+        <name><surname>Robertson</surname><given-names>Holly</given-names></name>
+        <name><surname>Anderson</surname><given-names>Elizabeth</given-names></name>
+        <name><surname>Fu</surname><given-names>Beiyuan</given-names></name>
+        <name><surname>Yang</surname><given-names>Fengtang</given-names></name>
+        <name><surname>Zagnoli-Vieira</surname><given-names>Guido</given-names></name>
+        <name><surname>Chapman</surname><given-names>Phil</given-names></name>
+        <name><surname>Del Castillo Velasco-Herrera</surname><given-names>Martin</given-names></name>
+        <name><surname>Garnett</surname><given-names>Mathew J</given-names></name>
+        <name><surname>Jackson</surname><given-names>Stephen P</given-names></name>
+        <name><surname>Adams</surname><given-names>David J</given-names></name>
+      </person-group>
+      <article-title>Combinatorial CRISPR screen identifies fitness effects of gene paralogues</article-title>
+      <source>Nat. Commun.</source>
+      <publisher-name>Springer Science; Business Media LLC</publisher-name>
+      <year iso-8601-date="2021-02">2021</year><month>02</month>
+      <volume>12</volume>
+      <issue>1</issue>
+      <pub-id pub-id-type="doi">10.1038/s41467-021-21478-9</pub-id>
+      <fpage>1302</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Dandage2021-sp">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Dandage</surname><given-names>Rohan</given-names></name>
+        <name><surname>Landry</surname><given-names>Christian R</given-names></name>
+      </person-group>
+      <article-title>Identifying features of genome evolution to exploit cancer vulnerabilities</article-title>
+      <source>Cell Syst.</source>
+      <publisher-name>Elsevier BV</publisher-name>
+      <year iso-8601-date="2021-12">2021</year><month>12</month>
+      <volume>12</volume>
+      <issue>12</issue>
+      <pub-id pub-id-type="doi">10.1016/j.cels.2021.08.007</pub-id>
+      <fpage>1127</fpage>
+      <lpage>1130</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Ryan2023-bw">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Ryan</surname><given-names>Colm J</given-names></name>
+        <name><surname>Mehta</surname><given-names>Ishan</given-names></name>
+        <name><surname>Kebabci</surname><given-names>Narod</given-names></name>
+        <name><surname>Adams</surname><given-names>David J</given-names></name>
+      </person-group>
+      <article-title>Targeting synthetic lethal paralogs in cancer</article-title>
+      <source>Trends Cancer</source>
+      <publisher-name>Elsevier BV</publisher-name>
+      <year iso-8601-date="2023-05">2023</year><month>05</month>
+      <volume>9</volume>
+      <issue>5</issue>
+      <pub-id pub-id-type="doi">10.1016/j.trecan.2023.02.002</pub-id>
+      <fpage>397</fpage>
+      <lpage>409</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Peter_hyperfine_2023">
+    <element-citation publication-type="software">
+      <person-group person-group-type="author">
+        <name><surname>Peter</surname><given-names>David</given-names></name>
+      </person-group>
+      <article-title>hyperfine</article-title>
+      <year iso-8601-date="2023-03">2023</year><month>03</month>
+      <uri>https://github.com/sharkdp/hyperfine</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-10.1093U002FgigascienceU002Fgiab008">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Danecek</surname><given-names>Petr</given-names></name>
+        <name><surname>Bonfield</surname><given-names>James K</given-names></name>
+        <name><surname>Liddle</surname><given-names>Jennifer</given-names></name>
+        <name><surname>Marshall</surname><given-names>John</given-names></name>
+        <name><surname>Ohan</surname><given-names>Valeriu</given-names></name>
+        <name><surname>Pollard</surname><given-names>Martin O</given-names></name>
+        <name><surname>Whitwham</surname><given-names>Andrew</given-names></name>
+        <name><surname>Keane</surname><given-names>Thomas</given-names></name>
+        <name><surname>McCarthy</surname><given-names>Shane A</given-names></name>
+        <name><surname>Davies</surname><given-names>Robert M</given-names></name>
+        <name><surname>Li</surname><given-names>Heng</given-names></name>
+      </person-group>
+      <article-title>Twelve years of SAMtools and BCFtools</article-title>
+      <source>GigaScience</source>
+      <year iso-8601-date="2021-02">2021</year><month>02</month>
+      <volume>10</volume>
+      <issue>2</issue>
+      <issn>2047-217X</issn>
+      <uri>https://doi.org/10.1093/gigascience/giab008</uri>
+      <pub-id pub-id-type="doi">10.1093/gigascience/giab008</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Langmead2012-sz">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Langmead</surname><given-names>Ben</given-names></name>
+        <name><surname>Salzberg</surname><given-names>Steven L</given-names></name>
+      </person-group>
+      <article-title>Fast gapped-read alignment with bowtie 2</article-title>
+      <source>Nat. Methods</source>
+      <publisher-name>Springer Science; Business Media LLC</publisher-name>
+      <year iso-8601-date="2012-03">2012</year><month>03</month>
+      <volume>9</volume>
+      <issue>4</issue>
+      <pub-id pub-id-type="doi">10.1038/nmeth.1923</pub-id>
+      <fpage>357</fpage>
+      <lpage>359</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-levenshtein">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Necas</surname><given-names>David</given-names></name>
+        <name><surname>Ohthamaa</surname><given-names>Mikko</given-names></name>
+        <name><surname>Haapala</surname><given-names>Antti</given-names></name>
+        <name><surname>Bachmann</surname><given-names>Max</given-names></name>
+      </person-group>
+      <article-title>Levenshtein: Python extension computing string distances and similarities</article-title>
+      <source>GitHub repository</source>
+      <publisher-name>GitHub</publisher-name>
+      <year iso-8601-date="2010">2010</year>
+      <uri>https://github.com/rapidfuzz/Levenshtein</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-Savonen2025-je">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Savonen</surname><given-names>Candace</given-names></name>
+        <name><surname>Parrish</surname><given-names>Phoebe</given-names></name>
+        <name><surname>Isaac</surname><given-names>Kate</given-names></name>
+        <name><surname>Baek</surname><given-names>Howard</given-names></name>
+        <name><surname>Grosso</surname><given-names>Daniel</given-names></name>
+        <name><surname>O’Brien</surname><given-names>Siobhan</given-names></name>
+        <name><surname>Fujimoto</surname><given-names>Marissa</given-names></name>
+        <name><surname>Berger</surname><given-names>Alice</given-names></name>
+      </person-group>
+      <article-title>Gimap: Calculate genetic interactions for paired CRISPR targets</article-title>
+      <publisher-name>The R Foundation</publisher-name>
+      <year iso-8601-date="2025-02">2025</year><month>02</month>
+      <pub-id pub-id-type="doi">10.32614/CRAN.package.gimap</pub-id>
+    </element-citation>
+  </ref>
+</ref-list>
+</back>
+</article>

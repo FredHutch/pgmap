@@ -1,0 +1,45 @@
+{
+    "input": {
+        "fastq": [
+            "example-data/two-read-strategy/240123_VH01189_224_AAFGFNYM5/Undetermined_S0_R1_001_Sampled10k.fastq.gz",
+            "example-data/two-read-strategy/240123_VH01189_224_AAFGFNYM5/Undetermined_S0_I1_001_Sampled10k.fastq.gz"
+        ],
+        "library": "example-data/pgPEN-library/paralog_pgRNA_annotations.txt",
+        "barcodes": "example-data/two-read-strategy/240123_VH01189_224_AAFGFNYM5/barcode_ref_file_revcomp.txt",
+        "output": null,
+        "quality_control": "qc.json",
+        "trim_strategy": [
+            [
+                0,
+                0,
+                20
+            ],
+            [
+                1,
+                1,
+                21
+            ],
+            [
+                1,
+                160,
+                166
+            ]
+        ],
+        "gRNA1_error": 1,
+        "gRNA2_error": 1,
+        "barcode_error": 1
+    },
+    "version": "1.1.0",
+    "total_reads": 10000,
+    "discard_rate": 0.738,
+    "gRNA1_mismatch_rate": 0.4473,
+    "gRNA2_mismatch_rate": 0.5957,
+    "barcode_mismatch_rate": 0.5476,
+    "estimated_recombination_rate": 0.3035311795642374,
+    "gRNA1_distance_mean": 0.03129770992366412,
+    "gRNA2_distance_mean": 0.13282442748091636,
+    "barcode_distance_mean": 0.12366412213740446,
+    "gRNA1_distance_variance": 0.03031816327719825,
+    "gRNA2_distance_variance": 0.11518209894528267,
+    "barcode_distance_variance": 0.10837130703338971
+}
